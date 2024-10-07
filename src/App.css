@@ -1,0 +1,173 @@
+body{
+  /*background: rgb(40,14,65);
+  background: linear-gradient(180deg, rgba(40,14,65,1) 2%, rgba(20,11,35,1) 39%);*/
+
+  background: url("./assets/images/bg.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.App {
+  text-align: center;
+}
+
+.text{
+  font-family: HelvC;
+  color: white;
+}
+
+.outline{
+  border: 10px;
+  border-style: solid;
+  border-color: coral;
+}
+
+.mainContainer{
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.presaleDiv{
+  position: relative;
+  width: 450px;
+  height: 500px;
+  text-align: center;
+  border: 5px solid #080813;
+  box-shadow: 
+  0 0 10px rgb(250, 207, 0),   /* Outer shadow */
+  inset 0 0 10px rgb(250, 207, 0); /* Inner shadow */
+  border-radius: 20px;
+  filter: blur(100%);
+}
+
+.flex{
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.logo{
+  margin-top: -50px;
+  width: 100px;
+}
+
+.presaleTxt{
+  font-size: medium;
+  position: absolute;
+  right:130px;
+  top:5px;
+}
+
+.progressBar{
+  margin-top: 80px;
+  margin-left: 15px;
+  margin-right: 15px;
+  background-color: #cfc5cd !important;
+}
+
+.walletBtn{
+  margin-top: 140px;
+  /*padding-bottom: 12px !important;*/
+  background-color: transparent !important;
+  border-color: transparent !important;
+  background: url("./assets/images/button.png");
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  font-weight: bold !important;
+  padding: 25px 60px !important;
+}
+
+.walletIndicator{
+  position: absolute;
+  right:10px;
+  top:30px;
+  display: flex;
+  background-color: rgb(122, 67, 122);
+  border-radius: 20px;
+  width: 150px;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  height: fit-content;
+  font-weight: bold;
+}
+
+.flex{
+  display: flex;
+  width:100%
+}
+
+.inputDiv{
+  background-color: rgb(187, 102, 57);
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.input{
+  background-color: transparent;
+  border: 0;
+  color: white;
+  border-bottom: 5px solid rgb(160, 65, 13);
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.input:focus{
+  outline: 0;
+}
+
+.input::placeholder{
+  color: rgb(255, 255, 255);
+}
+
+
+.notificationDiv{
+  position: absolute;
+  width: 100%;
+  height: 100vh;
+}
+
+.progress-bar{
+  background-color:#6b646a !important;
+}
+
+.buy-button{
+  background-color: transparent !important;
+  border: transparent !important;
+  background: url("./assets/images/button01.png");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  padding: 10px 20px !important;
+}
+
+@media(max-width:786px) {
+    .presaleTxt{
+        right: 25%;
+    }
+}
+
+@font-face {
+  font-family: Oxi;
+  src: url('./assets/fonts/Oxanium-VariableFont_wght.ttf');
+}
+
+@font-face {
+  font-family: HelvC;
+  src: url('./assets/fonts/helvetica-compressed-5871d14b6903a.otf');
+}
+
+@font-face {
+  font-family: Helv;
+  src: url('./assets/fonts/Helvetica.ttf');
+}
+

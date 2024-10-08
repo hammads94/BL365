@@ -12,6 +12,7 @@ import { ArrowDownIcon, WalletIcon } from "@heroicons/react/16/solid";
 import { presaleContract, tokenContract } from "../utils/constants";
 import { formatEther, formatUnits, parseEther } from "viem";
 import { getTransactionReceipt } from "../utils/helpers";
+import toast from "react-hot-toast";
 
 const Presale = () => {
   const { isConnected, address } = useAccount();
@@ -31,19 +32,13 @@ const Presale = () => {
     functionName: "tokenPerPrice",
   });
 
-  const { data: tokenBalance } = useReadContract({
+  const { data: tokenBalance, refetch } = useReadContract({
     ...tokenContract,
     functionName: "balanceOf",
     args: [address],
   });
 
-  useEffect(() => {
-    console.log(tokenPrice);
-  }, [tokenPrice]);
-
   function buy() {
-    console.log("wow");
-    console.log(exchangeInfo);
     writeContract(
       {
         ...presaleContract,
@@ -54,20 +49,26 @@ const Presale = () => {
       {
         onError: (e) => {
           console.log(e);
+          // handle errors
         },
         onSuccess: async (hash) => {
           let res = await getTransactionReceipt(hash);
           if (res.status === "success") {
-            alert("Success");
+            toast.success("Tokens bought successfully!");
+            refetch();
+            refetchNative();
           } else {
-            alert("Failed");
+            toast.error("Transaction failed!");
           }
         },
       }
     );
   }
 
-  const { data: balance } = useBalance({ address: address, chainId: 31337 });
+  const { data: balance, refetch: refetchNative } = useBalance({
+    address: address,
+    chainId: 31337,
+  });
 
   function formatSold(sold) {
     if (sold === undefined) {
@@ -130,7 +131,8 @@ const Presale = () => {
       {!isConnected ? (
         <div className="flex flex-col">
           <h1 className="text-xl text-center">
-            {formatSold(sold)} out of 10 Billion <strong className="font-ox">BL356</strong> Tokens Sold!
+            {formatSold(sold)} out of 10 Billion{" "}
+            <strong className="font-ox">BL356</strong> Tokens Sold!
           </h1>
           <div className="flex justify-center absolute bottom-10 inset-x-0 m-auto">
             <w3m-button />

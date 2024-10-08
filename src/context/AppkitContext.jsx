@@ -1,7 +1,6 @@
 import { createAppKit } from "@reown/appkit/react";
 
 import { WagmiProvider } from "wagmi";
-import { arbitrum, baseSepolia, mainnet } from "@reown/appkit/networks";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 
@@ -18,12 +17,12 @@ const metadata = {
 };
 
 const network = {
-  id: 'eip155:31337',
-  chainId: 31337,
-  name: 'Anvil',
-  currency: 'ETH',
+  id: 'eip155:97',
+  chainId: 97,
+  name: 'BSCTestnet',
+  currency: 'tBNB',
   explorerUrl: '',
-  rpcUrl: 'http://127.0.0.1:8545',
+  rpcUrl: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
   chainNamespace: 'eip155',
 }
 
@@ -46,9 +45,11 @@ createAppKit({
     email:false,
     socials:false
   },
+  themeMode:'dark',
   themeVariables:{
     '--w3m-font-family': 'Ox',
     '--w3m-accent':'#eb9534',
+    '--w3m-color-mix':'#fff'
   }
 });
 

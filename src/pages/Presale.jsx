@@ -1,7 +1,7 @@
 import blLogo from "/logo.png";
 import blTokenLogo from "/token.png";
 import bnblogo from "/bnb.png";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   useAccount,
   useBalance,
@@ -13,9 +13,11 @@ import { presaleContract, tokenContract } from "../utils/constants";
 import { formatEther, formatUnits, parseEther } from "viem";
 import { getTransactionReceipt } from "../utils/helpers";
 import toast from "react-hot-toast";
+import Loader from "../components/Loader";
 
 const Presale = () => {
   const { isConnected, address } = useAccount();
+  const [loading, setLoading] = useState(false);
   const [exchangeInfo, setExchangeInfo] = useState({
     value: "...",
     conversion: "...",
@@ -39,6 +41,16 @@ const Presale = () => {
   });
 
   function buy() {
+    setLoading(true);
+    if (
+      exchangeInfo.value === "..." ||
+      exchangeInfo.conversion === "..." ||
+      exchangeInfo.value === 0 ||
+      exchangeInfo.conversion === 0
+    ) {
+      setLoading(false);
+      return toast.error("Invalid amount!");
+    }
     writeContract(
       {
         ...presaleContract,
@@ -49,7 +61,20 @@ const Presale = () => {
       {
         onError: (e) => {
           console.log(e);
-          // handle errors
+          if (e.message.includes("User denied transaction signature")) {
+            toast.error("Transaction rejected!");
+          } else if (e.message.includes("insufficient funds")) {
+            toast.error("Insufficient funds!");
+          } else if (e.message.includes("Not enough tokens available")) {
+            toast.error("Not enough tokens available for sale!");
+          } else if (e.message.includes("Presale has ended!")) {
+            toast.error("Presale has ended!");
+          } else if (e.message.includes("Presale is not active.")) {
+            toast.error("Presale is not active!");
+          } else if (e.message.includes("Presale Cap Breached!")) {
+            toast.error("Presale Cap Breached!");
+          }
+          setLoading(false);
         },
         onSuccess: async (hash) => {
           let res = await getTransactionReceipt(hash);
@@ -60,6 +85,7 @@ const Presale = () => {
           } else {
             toast.error("Transaction failed!");
           }
+          setLoading(false);
         },
       }
     );
@@ -67,7 +93,6 @@ const Presale = () => {
 
   const { data: balance, refetch: refetchNative } = useBalance({
     address: address,
-    chainId: 31337,
   });
 
   function formatSold(sold) {
@@ -107,22 +132,16 @@ const Presale = () => {
 
   return (
     <div className="relative bg-[#f5f5f518] h-[500px] w-[450px] flex flex-col items-center justify-center border-4 rounded-2xl border-[#e3ba34] shadow-yellow-400 shadow-[0_0_20px_1px_rgba(0,0,0,0.25),inset_0_0_10px_1px_rgba(0,0,0,0.4)] ">
-      {isConnected ?? (
-        <div className="walletIndicator">
-          <WalletIcon />
-          <text
-            style={{
-              marginLeft: "5px",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              fontFamily: "Helv",
-            }}
+      {isConnected && (
+        <div className="font-ox flex items-center gap-1 justify-center absolute top-2 right-2">
+          <WalletIcon  className="h-4"/>
+          <p
           >
-            {address}
-          </text>
+            {address.slice(0, 6)}...{address.slice(-4)}
+          </p>
         </div>
       )}
-      <div className="absolute top-[-40px]">
+      <div className="absolute top-[-45px]">
         <img src={blLogo} className="h-[120px]" />
         <h1 className="absolute right-[-20px] text-nowrap font-bold">
           PRESALE
@@ -140,6 +159,9 @@ const Presale = () => {
         </div>
       ) : (
         <div className="flex flex-col gap-4 w-[80%]">
+          <div className="bg-black text-white rounded-lg p-2">
+          <p className="flex items-center justify-center gap-2"> {formatEther(tokenPrice)}<img src={bnblogo} className="h-4"/>{" per token"}</p>
+          </div>
           <div className="rounded-2xl px-4 py-2 text-center gap-y-2 flex flex-col bg-[#e85d0da6] shadow-red-800 shadow-[0_0_20px_1px_rgba(0,0,0,0.25)]">
             <p className="font-ox">
               Balance:{" "}
@@ -187,9 +209,9 @@ const Presale = () => {
 
           <button
             onClick={buy}
-            className="font-ox bg-yellow-500 p-2 absolute bottom-10 m-auto left-0 right-0 w-20 rounded-xl shadow-yellow-600 shadow-[0_0_20px_1px_rgba(0,0,0,0.25)]"
+            className="flex items-center justify-center font-ox bg-yellow-500 p-2 absolute bottom-10 m-auto left-0 right-0 w-20 rounded-xl shadow-yellow-600 shadow-[0_0_20px_1px_rgba(0,0,0,0.25)]"
           >
-            Buy
+            {!loading ? "Buy" : <Loader />}
           </button>
         </div>
       )}

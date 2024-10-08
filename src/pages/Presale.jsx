@@ -96,6 +96,7 @@ const Presale = () => {
   });
 
   function formatSold(sold) {
+    let soldString = sold&&formatEther(sold);
     if (sold === undefined) {
       return "...";
     }
@@ -104,13 +105,13 @@ const Presale = () => {
     }
     if (soldString.length >= 7 && soldString.length < 10) {
       sold = Math.round(sold / Math.pow(10, 6 - 2)) / 100;
-      return sold + " Million";
+      return soldString + " Million";
     }
-    if (soldString.length >= 10 && supplysoldStringString.length < 13) {
+    if (soldString.length >= 10 && soldString.length < 13) {
       sold = Math.round(sold / Math.pow(10, 9 - 2)) / 100;
-      console.log(sold);
-      return sold + " Billion";
+      return soldString + " Billion";
     }
+    return soldString;
   }
 
   function onChange(e) {
@@ -160,7 +161,7 @@ const Presale = () => {
       ) : (
         <div className="flex flex-col gap-4 w-[80%]">
           <div className="bg-black text-white rounded-lg p-2">
-          <p className="flex items-center justify-center gap-2"> {formatEther(tokenPrice)}<img src={bnblogo} className="h-4"/>{" per token"}</p>
+          <p className="flex items-center justify-center gap-2"> {tokenPrice&&formatEther(tokenPrice)}<img src={bnblogo} className="h-4"/>{" per token"}</p>
           </div>
           <div className="rounded-2xl px-4 py-2 text-center gap-y-2 flex flex-col bg-[#e85d0da6] shadow-red-800 shadow-[0_0_20px_1px_rgba(0,0,0,0.25)]">
             <p className="font-ox">

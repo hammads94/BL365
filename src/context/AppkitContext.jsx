@@ -3,6 +3,7 @@ import { createAppKit } from "@reown/appkit/react";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
+import { anvil } from "viem/chains";
 
 
 const queryClient = new QueryClient();
@@ -16,18 +17,7 @@ const metadata = {
   icons: ["https://avatars.githubusercontent.com/u/179229932"],
 };
 
-const network = {
-  id: 'eip155:97',
-  chainId: 97,
-  name: 'BSCTestnet',
-  currency: 'tBNB',
-  explorerUrl: '',
-  rpcUrl: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
-  chainNamespace: 'eip155',
-}
-
-
-const networks = [network];
+const networks = [anvil];
 
 const wagmiAdapter = new WagmiAdapter({
   networks,

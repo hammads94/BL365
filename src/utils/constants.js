@@ -1,53 +1,19 @@
 import { erc20Abi } from "viem";
 
 export const tokenContract = {
-    address:'0xD022d810bDd86097147dA8D56AdB3001759a4794',
+    address:'0xe37D6C7965003fe791461F2AE1919f95B92789EA',
     abi:erc20Abi
 }
 
+export const usdtContract = {
+    address:'0x337610d27c682E347C9cD60BD4b3b107C9d34dDd',
+    abi:erc20Abi
+}
+
+
 export const presaleContract = {
-  address: "0xEd1Bdc448f23d32508ed8eBD8B339739076285F2",
+  address: "0xA0A35Ad8Dbb5e33aE221953CbF4F2c40281A602D",
   abi: JSON.parse(`[
-	{
-		"inputs": [],
-		"name": "activatePresale",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_amount",
-				"type": "uint256"
-			}
-		],
-		"name": "buyTokens",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "price",
-				"type": "uint256"
-			}
-		],
-		"name": "changePresalePrice",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "endPresale",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
 	{
 		"inputs": [
 			{
@@ -111,13 +77,6 @@ export const presaleContract = {
 		"type": "event"
 	},
 	{
-		"inputs": [],
-		"name": "pausePresale",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"anonymous": false,
 		"inputs": [],
 		"name": "PresaleActivated",
@@ -134,13 +93,6 @@ export const presaleContract = {
 		"inputs": [],
 		"name": "PresalePaused",
 		"type": "event"
-	},
-	{
-		"inputs": [],
-		"name": "renounceOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
 	},
 	{
 		"anonymous": false,
@@ -162,21 +114,21 @@ export const presaleContract = {
 		"type": "event"
 	},
 	{
-		"inputs": [
+		"inputs": [],
+		"name": "USDT",
+		"outputs": [
 			{
-				"internalType": "address",
-				"name": "newOwner",
+				"internalType": "contract IERC20",
+				"name": "",
 				"type": "address"
 			}
 		],
-		"name": "transferOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [],
-		"name": "withdrawFunds",
+		"name": "activatePresale",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -184,6 +136,70 @@ export const presaleContract = {
 	{
 		"inputs": [],
 		"name": "amountAvailableForPresale",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "useUSDT",
+				"type": "bool"
+			}
+		],
+		"name": "buyTokens",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "changePresalePrice",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "endPresale",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getTokenPriceUSDT",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getUSDTPrice",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -205,6 +221,13 @@ export const presaleContract = {
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "pausePresale",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -248,6 +271,13 @@ export const presaleContract = {
 	},
 	{
 		"inputs": [],
+		"name": "renounceOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "token",
 		"outputs": [
 			{
@@ -283,6 +313,26 @@ export const presaleContract = {
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "withdrawFunds",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	}
 ]`),

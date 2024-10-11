@@ -1,6 +1,7 @@
 import blLogo from "/logo.png";
 import blTokenLogo from "/token.png";
-import bnblogo from "/bnb.png";
+import pollogo from "/POL.png";
+import usdtlogo from "/USDT.png";
 import { useState } from "react";
 import {
   useAccount,
@@ -9,20 +10,31 @@ import {
   useWriteContract,
 } from "wagmi";
 import { ArrowDownIcon, WalletIcon } from "@heroicons/react/16/solid";
-import { presaleContract, tokenContract } from "../utils/constants";
+import {
+  presaleContract,
+  tokenContract,
+  usdtContract,
+} from "../utils/constants";
 import { formatEther, formatUnits, parseEther } from "viem";
 import { getTransactionReceipt } from "../utils/helpers";
 import toast from "react-hot-toast";
 import Loader from "../components/Loader";
+import ListBoxComponent from "../components/ListBox";
+import { useEffect } from "react";
 
+export const tokens = [
+  { id: 1, name: "POL" },
+  { id: 2, name: "USDT" },
+];
 const Presale = () => {
+  const [selected, setSelected] = useState(tokens[0]);
   const { isConnected, address } = useAccount();
   const [loading, setLoading] = useState(false);
   const [exchangeInfo, setExchangeInfo] = useState({
     value: "...",
     conversion: "...",
   });
-  const { writeContract } = useWriteContract();
+  const { writeContract, writeContractAsync } = useWriteContract();
 
   const { data: sold } = useReadContract({
     ...presaleContract,
@@ -34,14 +46,60 @@ const Presale = () => {
     functionName: "tokenPerPrice",
   });
 
+  const { data: usdtBalance } = useReadContract({
+    ...usdtContract,
+    functionName: "balanceOf",
+    args: [address],
+  });
+
+  const { data: usdtPrice } = useReadContract({
+    ...presaleContract,
+    functionName: "getTokenPriceUSDT",
+  });
+
   const { data: tokenBalance, refetch } = useReadContract({
     ...tokenContract,
     functionName: "balanceOf",
     args: [address],
   });
 
-  function buy() {
+  const { data: allowance } = useReadContract({
+    ...tokenContract,
+    functionName: "allowance",
+    args: [address, presaleContract.address],
+  });
+
+  async function buy() {
+    if (loading) return;
     setLoading(true);
+    if (selected.name === "USDT" && allowance < exchangeInfo.value) {
+      console.log(exchangeInfo);
+      try {
+        let hash = await writeContractAsync({
+          ...usdtContract,
+          functionName: "approve",
+          args: [
+            presaleContract.address,
+            parseEther(Number.MAX_SAFE_INTEGER.toString()),
+          ],
+        });
+        let res = await getTransactionReceipt(hash);
+        if (res.status === "success") {
+          toast.success("Approval successful!");
+        } else {
+          toast.error("Transaction failed!");
+        }
+      } catch (e) {
+        console.log(e);
+        if (e.message.includes("User denied transaction signature")) {
+          toast.error("Transaction rejected!");
+        } else {
+          toast.error("Transaction failed!");
+        }
+        setLoading(false);
+        return;
+      }
+    }
     if (
       exchangeInfo.value === "..." ||
       exchangeInfo.conversion === "..." ||
@@ -55,8 +113,11 @@ const Presale = () => {
       {
         ...presaleContract,
         functionName: "buyTokens",
-        args: [exchangeInfo?.conversion.toString()],
-        value: parseEther(exchangeInfo?.value.toString()),
+        args: [exchangeInfo?.conversion.toString(), selected.name === "USDT"],
+        value:
+          selected.name === "POL"
+            ? parseEther(exchangeInfo?.value.toString())
+            : 0n,
       },
       {
         onError: (e) => {
@@ -73,6 +134,14 @@ const Presale = () => {
             toast.error("Presale is not active!");
           } else if (e.message.includes("Presale Cap Breached!")) {
             toast.error("Presale Cap Breached!");
+          } else if (e.message.includes("Not enough USDT allowance.")) {
+            toast.error("Not enough USDT allowance.");
+          } else if (e.message.includes("Not enough USDT balance.")) {
+            toast.error("Not enough USDT balance.");
+          } else if (e.message.includes("Incorrect POL value sent.")) {
+            toast.error("Incorrect POL value sent.");
+          } else {
+            toast.error("Transaction failed!");
           }
           setLoading(false);
         },
@@ -96,7 +165,7 @@ const Presale = () => {
   });
 
   function formatSold(sold) {
-    let soldString = sold&&formatEther(sold);
+    let soldString = sold && formatEther(sold);
     if (sold === undefined) {
       return "...";
     }
@@ -114,13 +183,28 @@ const Presale = () => {
     return soldString;
   }
 
+  useEffect(() => {
+    doConversion(exchangeInfo.value);
+  }, [selected]);
+
   function onChange(e) {
     var value = e.target.value;
+    doConversion(value);
+  }
+
+  function doConversion(value) {
     try {
       value = parseFloat(value);
       if (!isNaN(value)) {
         setExchangeInfo({
-          conversion: Math.round(value / parseFloat(formatEther(tokenPrice))),
+          conversion: Math.round(
+            value /
+              parseFloat(
+                selected.name === "POL"
+                  ? formatEther(tokenPrice)
+                  : formatUnits(usdtPrice, 6)
+              )
+          ),
           value: value,
         });
       } else {
@@ -135,9 +219,8 @@ const Presale = () => {
     <div className="relative bg-[#f5f5f518] h-[500px] w-[450px] flex flex-col items-center justify-center border-4 rounded-2xl border-[#e3ba34] shadow-yellow-400 shadow-[0_0_20px_1px_rgba(0,0,0,0.25),inset_0_0_10px_1px_rgba(0,0,0,0.4)] ">
       {isConnected && (
         <div className="font-ox flex items-center gap-1 justify-center absolute top-2 right-2">
-          <WalletIcon  className="h-4"/>
-          <p
-          >
+          <WalletIcon className="h-4" />
+          <p>
             {address.slice(0, 6)}...{address.slice(-4)}
           </p>
         </div>
@@ -161,20 +244,48 @@ const Presale = () => {
       ) : (
         <div className="flex flex-col gap-4 w-[80%]">
           <div className="bg-black text-white rounded-lg p-2">
-          <p className="flex items-center justify-center gap-2"> {tokenPrice&&formatEther(tokenPrice)}<img src={bnblogo} className="h-4"/>{" per token"}</p>
+            <p className="flex items-center justify-center gap-2">
+              {selected.name === "POL" ? (
+                <>
+                  {tokenPrice && formatEther(tokenPrice)}
+                  <img src={pollogo} className="h-4" />
+                  {" per token"}
+                </>
+              ) : (
+                <>
+                  {/* change to 6 */}
+                  {usdtPrice && formatUnits(usdtPrice, 6)}
+                  <img src={usdtlogo} className="h-4" />
+                  {" per token"}
+                </>
+              )}
+            </p>
           </div>
           <div className="rounded-2xl px-4 py-2 text-center gap-y-2 flex flex-col bg-[#e85d0da6] shadow-red-800 shadow-[0_0_20px_1px_rgba(0,0,0,0.25)]">
             <p className="font-ox">
-              Balance:{" "}
-              {balance !== undefined
-                ? parseFloat(
-                    formatUnits(balance?.value, balance?.decimals)
-                  ).toFixed(2)
-                : "..."}
+              {selected.name === "POL" ? (
+                <>
+                  {" "}
+                  Balance:{" "}
+                  {balance !== undefined
+                    ? parseFloat(
+                        formatUnits(balance?.value, balance?.decimals)
+                      ).toFixed(2)
+                    : "..."}
+                </>
+              ) : (
+                <>
+                  {" "}
+                  Balance:{" "}
+                  {usdtBalance !== undefined
+                    ? parseFloat(formatUnits(usdtBalance, 6)).toFixed(2)
+                    : "..."}
+                </>
+              )}
             </p>
             <div className="flex justify-between">
               <input
-                id="valueBNB"
+                id="valuePOL"
                 type="number"
                 placeholder="0.0"
                 className="rounded-sm p-2 bg-transparent text-white placeholder:text-white/70 border-b-4 border-[#982B1C] appearance-none "
@@ -182,10 +293,7 @@ const Presale = () => {
                   onChange(e);
                 }}
               ></input>
-              <div className="flex gap-2 items-center font-ox">
-                <img className="h-6" src={bnblogo} />
-                <>BNB</>
-              </div>
+              <ListBoxComponent selected={selected} setSelected={setSelected} />
             </div>
           </div>
           <ArrowDownIcon className="h-6" />
@@ -195,7 +303,7 @@ const Presale = () => {
             </p>
             <div className="flex justify-between">
               <input
-                id="valueBNB"
+                id="valuePOL"
                 type="number"
                 placeholder="0.0"
                 className="rounded-sm p-2 bg-transparent text-white placeholder:text-white/70 border-b-4 border-[#982B1C] appearance-none"

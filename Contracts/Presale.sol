@@ -3,8 +3,10 @@ pragma solidity ^0.8.27;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
 contract TokenPresale is Ownable {
+    AggregatorV3Interface internal priceFeed;
     IERC20 public token;
     uint256 public tokenPerPrice = 0.001 ether;
     uint256 public tokensSold;
@@ -12,6 +14,7 @@ contract TokenPresale is Ownable {
     address private presaleWallet;
     uint256 public presaleCap;
     bool public presaleEnded = false;
+    IERC20 public USDT = IERC20(0x337610d27c682E347C9cD60BD4b3b107C9d34dDd);
 
     event TokensPurchased(address indexed buyer, uint256 amount);
     event PresaleEnded();
@@ -23,6 +26,9 @@ contract TokenPresale is Ownable {
         uint256 _presaleCap,
         address _presaleWallet
     ) Ownable(msg.sender) {
+        priceFeed = AggregatorV3Interface(
+            0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526
+        );
         token = _token;
         presaleActive = true;
         presaleCap = _presaleCap;
@@ -30,25 +36,47 @@ contract TokenPresale is Ownable {
         emit PresaleActivated();
     }
 
+    function getUSDTPrice() public view returns (uint256) {
+        (, int256 price, , , ) = priceFeed.latestRoundData();
+        return uint256(price);
+    }
+
+    function getPOLToUSDTPrice() public view returns (uint256) {
+        return ((getUSDTPrice() * tokenPerPrice) / 1e8) / 1e12; // for 6 decimal USDT
+        // return (getUSDTPrice() * tokenPerPrice) / 1e8;
+    }
+
     function activatePresale() public onlyOwner {
         presaleActive = true;
         emit PresaleActivated();
     }
 
-    function buyTokens(uint256 _amount) public payable {
+    function buyTokens(uint256 _amount, bool useUSDT) public payable {
         require(!presaleEnded, "Presale has ended!");
         require(presaleActive, "Presale is not active.");
-        require(
-            msg.value == _amount * tokenPerPrice,
-            "Incorrect ETH value sent."
-        );
         require(
             token.allowance(presaleWallet, address(this)) >= _amount * 1e18 &&
                 token.balanceOf(presaleWallet) >= _amount * 1e18,
             "Not enough tokens available."
         );
         require(tokensSold + _amount <= presaleCap, "Presale Cap Breached!");
-
+        if (!useUSDT) {
+            require(
+                msg.value == _amount * tokenPerPrice,
+                "Incorrect ETH value sent."
+            );
+        } else {
+            uint256 tokenPriceUSDT = getPOLToUSDTPrice() * _amount;
+            require(
+                USDT.allowance(msg.sender, address(this)) >= tokenPerPrice,
+                "Not enough USDT allowance."
+            );
+            require(
+                USDT.balanceOf(msg.sender) >= tokenPriceUSDT,
+                "Not enough USDT balance."
+            );
+            USDT.transferFrom(msg.sender, presaleWallet, tokenPriceUSDT);
+        }
         token.transferFrom(presaleWallet, msg.sender, _amount * 1e18);
         tokensSold += _amount * 1e18;
 
@@ -56,7 +84,7 @@ contract TokenPresale is Ownable {
     }
 
     function endPresale() public onlyOwner {
-        presaleEnded = false;
+        presaleEnded = true;
         emit PresaleEnded();
     }
 

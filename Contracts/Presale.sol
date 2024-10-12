@@ -8,13 +8,13 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interf
 contract TokenPresale is Ownable {
     AggregatorV3Interface internal priceFeed;
     IERC20 public token;
-    uint256 public tokenPerPrice = 0.001 ether;
+    uint256 public tokenPerPrice = 0.00001 ether;
     uint256 public tokensSold;
     bool public presaleActive;
     address private presaleWallet;
     uint256 public presaleCap;
     bool public presaleEnded = false;
-    IERC20 public USDT = IERC20(0x337610d27c682E347C9cD60BD4b3b107C9d34dDd);
+    IERC20 public USDT = IERC20(0x3273832fF31dfd5833b0875fa0cf42f0CD7bF875);
 
     event TokensPurchased(address indexed buyer, uint256 amount);
     event PresaleEnded();
@@ -23,15 +23,14 @@ contract TokenPresale is Ownable {
 
     constructor(
         IERC20 _token,
-        uint256 _presaleCap,
         address _presaleWallet
     ) Ownable(msg.sender) {
         priceFeed = AggregatorV3Interface(
-            0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526
+            0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1
         );
         token = _token;
         presaleActive = true;
-        presaleCap = _presaleCap;
+        presaleCap = 1e30;
         presaleWallet = _presaleWallet;
         emit PresaleActivated();
     }
@@ -41,7 +40,7 @@ contract TokenPresale is Ownable {
         return uint256(price);
     }
 
-    function getPOLToUSDTPrice() public view returns (uint256) {
+    function getTokenPriceUSDT() public view returns (uint256) {
         return ((getUSDTPrice() * tokenPerPrice) / 1e8) / 1e12; // for 6 decimal USDT
         // return (getUSDTPrice() * tokenPerPrice) / 1e8;
     }
@@ -63,12 +62,12 @@ contract TokenPresale is Ownable {
         if (!useUSDT) {
             require(
                 msg.value == _amount * tokenPerPrice,
-                "Incorrect ETH value sent."
+                "Incorrect POL value sent."
             );
         } else {
-            uint256 tokenPriceUSDT = getPOLToUSDTPrice() * _amount;
+            uint256 tokenPriceUSDT = getTokenPriceUSDT() * _amount;
             require(
-                USDT.allowance(msg.sender, address(this)) >= tokenPerPrice,
+                USDT.allowance(msg.sender, address(this)) >= tokenPriceUSDT,
                 "Not enough USDT allowance."
             );
             require(

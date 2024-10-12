@@ -15,7 +15,7 @@ import {
   tokenContract,
   usdtContract,
 } from "../utils/constants";
-import { formatEther, formatUnits, parseEther } from "viem";
+import { formatEther, formatUnits, parseEther, parseUnits } from "viem";
 import { getTransactionReceipt } from "../utils/helpers";
 import toast from "react-hot-toast";
 import Loader from "../components/Loader";
@@ -36,7 +36,7 @@ const Presale = () => {
   });
   const { writeContract, writeContractAsync } = useWriteContract();
 
-  const { data: sold } = useReadContract({
+  const { data: sold, refetch: refetchSold } = useReadContract({
     ...presaleContract,
     functionName: "tokensSold",
   });
@@ -46,7 +46,7 @@ const Presale = () => {
     functionName: "tokenPerPrice",
   });
 
-  const { data: usdtBalance } = useReadContract({
+  const { data: usdtBalance, refetch: refetchUSDT } = useReadContract({
     ...usdtContract,
     functionName: "balanceOf",
     args: [address],
@@ -64,7 +64,7 @@ const Presale = () => {
   });
 
   const { data: allowance } = useReadContract({
-    ...tokenContract,
+    ...usdtContract,
     functionName: "allowance",
     args: [address, presaleContract.address],
   });
@@ -72,7 +72,11 @@ const Presale = () => {
   async function buy() {
     if (loading) return;
     setLoading(true);
-    if (selected.name === "USDT" && allowance < exchangeInfo.value) {
+    console.log(allowance);
+    if (
+      selected.name === "USDT" &&
+      parseInt(allowance.toString()) < parseInt(exchangeInfo.value)
+    ) {
       console.log(exchangeInfo);
       try {
         let hash = await writeContractAsync({
@@ -80,7 +84,7 @@ const Presale = () => {
           functionName: "approve",
           args: [
             presaleContract.address,
-            parseEther(Number.MAX_SAFE_INTEGER.toString()),
+            parseUnits(Number.MAX_SAFE_INTEGER.toString(), 6),
           ],
         });
         let res = await getTransactionReceipt(hash);
@@ -151,6 +155,8 @@ const Presale = () => {
             toast.success("Tokens bought successfully!");
             refetch();
             refetchNative();
+            refetchSold();
+            refetchUSDT();
           } else {
             toast.error("Transaction failed!");
           }
@@ -185,6 +191,8 @@ const Presale = () => {
 
   useEffect(() => {
     doConversion(exchangeInfo.value);
+    refetchUSDT();
+    refetchNative();
   }, [selected]);
 
   function onChange(e) {

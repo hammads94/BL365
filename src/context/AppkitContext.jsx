@@ -3,7 +3,7 @@ import { createAppKit } from "@reown/appkit/react";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { anvil } from "viem/chains";
+import { anvil, baseSepolia, polygon } from "viem/chains";
 
 
 const queryClient = new QueryClient();
@@ -17,7 +17,7 @@ const metadata = {
   icons: ["https://avatars.githubusercontent.com/u/179229932"],
 };
 
-const networks = [anvil];
+const networks = [baseSepolia];
 
 const wagmiAdapter = new WagmiAdapter({
   networks,

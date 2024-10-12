@@ -1,18 +1,18 @@
 import { erc20Abi } from "viem";
 
 export const tokenContract = {
-    address:'0xe37D6C7965003fe791461F2AE1919f95B92789EA',
+    address:'0x2527F88B0C72Fc86757C039346ad9b690b185920',
     abi:erc20Abi
 }
 
 export const usdtContract = {
-    address:'0x337610d27c682E347C9cD60BD4b3b107C9d34dDd',
+    address:'0x3273832fF31dfd5833b0875fa0cf42f0CD7bF875',
     abi:erc20Abi
 }
 
 
 export const presaleContract = {
-  address: "0xA0A35Ad8Dbb5e33aE221953CbF4F2c40281A602D",
+  address: "0xd87730DF1Eba6c9C23bf8EFC0DFc1735fFF8ef85",
   abi: JSON.parse(`[
 	{
 		"inputs": [

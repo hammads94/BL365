@@ -57,6 +57,11 @@ const Presale = () => {
     functionName: "getTokenPriceUSDT",
   });
 
+  const { data: presaleCap } = useReadContract({
+    ...presaleContract,
+    functionName: "presaleCap",
+  });
+
   const { data: tokenBalance, refetch } = useReadContract({
     ...tokenContract,
     functionName: "balanceOf",
@@ -72,7 +77,6 @@ const Presale = () => {
   async function buy() {
     if (loading) return;
     setLoading(true);
-    console.log(allowance);
     if (
       selected.name === "USDT" &&
       parseInt(allowance.toString()) < parseInt(exchangeInfo.value)
@@ -171,20 +175,23 @@ const Presale = () => {
   });
 
   function formatSold(sold) {
-    let soldString = sold && formatEther(sold);
-    if (sold === undefined) {
-      return "...";
-    }
-    if (sold.length < 0 || sold === 0n) {
+    if (sold === 0n) {
       return 0;
     }
+    if (!sold) return "...";
+    let soldString = formatEther(sold);
+    sold = parseFloat(soldString);
     if (soldString.length >= 7 && soldString.length < 10) {
       sold = Math.round(sold / Math.pow(10, 6 - 2)) / 100;
-      return soldString + " Million";
+      return sold + " Million";
     }
     if (soldString.length >= 10 && soldString.length < 13) {
       sold = Math.round(sold / Math.pow(10, 9 - 2)) / 100;
-      return soldString + " Billion";
+      return sold + " Billion";
+    }
+    if (soldString.length >= 13 && soldString.length < 16) {
+      sold = Math.round(sold / Math.pow(10, 12 - 2)) / 100;
+      return sold + " Trillion";
     }
     return soldString;
   }
@@ -242,7 +249,7 @@ const Presale = () => {
       {!isConnected ? (
         <div className="flex flex-col">
           <h1 className="text-xl text-center">
-            {formatSold(sold)} out of 10 Billion{" "}
+            {formatSold(sold)} out of {formatSold(presaleCap)}{" "}
             <strong className="font-ox">BL356</strong> Tokens Sold!
           </h1>
           <div className="flex justify-center absolute bottom-10 inset-x-0 m-auto">

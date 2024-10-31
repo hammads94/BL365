@@ -230,6 +230,10 @@ const Presale = () => {
     }
   }
 
+  useEffect(() => {
+    console.log(isConnected);
+  }, [isConnected]);
+
   return (
     <div className="relative bg-[#f5f5f518] h-[500px] w-[450px] flex flex-col items-center justify-center border-4 rounded-2xl border-[#e3ba34] shadow-yellow-400 shadow-[0_0_20px_1px_rgba(0,0,0,0.25),inset_0_0_10px_1px_rgba(0,0,0,0.4)] ">
       {isConnected && (

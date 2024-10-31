@@ -5,6 +5,7 @@ import usdtlogo from "/USDT.png";
 import { useState } from "react";
 import {
   useAccount,
+  useAccountEffect,
   useBalance,
   useReadContract,
   useWriteContract,
@@ -30,6 +31,12 @@ const Presale = () => {
   const [selected, setSelected] = useState(tokens[0]);
   const { isConnected, address } = useAccount();
   const [loading, setLoading] = useState(false);
+  useAccountEffect({
+    onDisconnect: () => {
+      localStorage.removeItem("wagmi.store");
+      console.log("Disconnected");
+    },
+  });
   const [exchangeInfo, setExchangeInfo] = useState({
     value: "...",
     conversion: "...",

@@ -22,12 +22,14 @@ import toast from "react-hot-toast";
 import Loader from "../components/Loader";
 import ListBoxComponent from "../components/ListBox";
 import { useEffect } from "react";
+import { useAppKit } from "@reown/appkit/react";
 
 export const tokens = [
   { id: 1, name: "POL" },
   { id: 2, name: "USDT" },
 ];
 const Presale = () => {
+  const { open } = useAppKit();
   const [selected, setSelected] = useState(tokens[0]);
   const { isConnected, address } = useAccount();
   const [loading, setLoading] = useState(false);
@@ -246,7 +248,18 @@ const Presale = () => {
       {isConnected && (
         <div className="font-ox flex items-center gap-1 justify-center absolute top-2 right-2">
           <WalletIcon className="h-4" />
-          <p>
+          <p
+            onClick={() => {
+              open();
+            }}
+            onMouseEnter={(e) => {
+              e.target.innerText = "Disconnect";
+            }}
+            onMouseLeave={(e) => {
+              e.target.innerText =
+                address.slice(0, 6) + "..." + address.slice(-4);
+            }}
+          >
             {address.slice(0, 6)}...{address.slice(-4)}
           </p>
         </div>

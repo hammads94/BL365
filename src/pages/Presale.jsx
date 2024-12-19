@@ -216,20 +216,26 @@ const Presale = () => {
     doConversion(value);
   }
 
+  useEffect(() => {
+    console.log(exchangeInfo);
+  }, [exchangeInfo]);
+
   function doConversion(value) {
     try {
       value = parseFloat(value);
       if (!isNaN(value)) {
+        let amount = Math.round(
+          value /
+            parseFloat(
+              selected.name === "POL"
+                ? formatEther(tokenPrice)
+                : formatUnits(usdtPrice, 6)
+            )
+        );
         setExchangeInfo({
-          conversion: Math.round(
-            value /
-              parseFloat(
-                selected.name === "POL"
-                  ? formatEther(tokenPrice)
-                  : formatUnits(usdtPrice, 6)
-              )
-          ),
-          value: value,
+          conversion: amount,
+          value:
+            selected.name === "POL" ? amount * formatEther(tokenPrice) : value,
         });
       } else {
         setExchangeInfo({ value: "...", conversion: "..." });
@@ -357,7 +363,6 @@ const Presale = () => {
 
           <button
             onClick={buy}
-            
             className="flex items-center justify-center font-ox bg-yellow-500 p-2 absolute bottom-10 m-auto left-0 right-0 w-20 rounded-xl shadow-yellow-600 shadow-[0_0_20px_1px_rgba(0,0,0,0.25)]"
           >
             {!loading ? "Buy" : <Loader />}
